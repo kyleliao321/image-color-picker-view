@@ -57,6 +57,22 @@ class ImageColorPickerView @JvmOverloads constructor(
         mImageBitmap = bitmap.copy(Bitmap.Config.RGBA_F16, true)
     }
 
+    fun setProbeSize(size: Int) {
+        mSelectorProbeRadius = size
+    }
+
+    fun setSelectorSize(size: Int) {
+        mSelectorRadius = size
+    }
+
+    fun setSelectorOffsetX(offsetX: Int) {
+        mSelectorOffsetX = offsetX
+    }
+
+    fun setSelectorOffsetY(offsetY: Int) {
+        mSelectorOffsetY = offsetY
+    }
+
     init {
 
         val density = resources.displayMetrics.density
@@ -113,14 +129,14 @@ class ImageColorPickerView @JvmOverloads constructor(
 
                 if (mShowSelector) {
                     drawCircle(
-                        mSelectorPositionX,
-                        mSelectorPositionY,
+                        mSelectorPositionX + mSelectorOffsetX,
+                        mSelectorPositionY + mSelectorOffsetY,
                         mSelectorRadius.toFloat(),
                         mSelectorPaint
                     )
                     drawCircle(
-                        mSelectorPositionX,
-                        mSelectorPositionY,
+                        mSelectorPositionX + mSelectorOffsetX,
+                        mSelectorPositionY + mSelectorOffsetY,
                         mSelectorRadius.toFloat(),
                         mSelectorStrokePaint
                     )
