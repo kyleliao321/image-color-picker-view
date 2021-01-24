@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ImageColorPickerView">
+        <attr name="selectorRadius" format="dimension" />
+        <attr name="selectorOffsetX" format="dimension" />
+        <attr name="selectorOffsetY" format="dimension" />
+        <attr name="enableSelector" format="integer" />
+    </declare-styleable>
+</resources>
