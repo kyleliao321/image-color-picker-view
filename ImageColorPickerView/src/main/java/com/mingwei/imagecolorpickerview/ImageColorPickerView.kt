@@ -7,7 +7,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.core.graphics.get
+import com.mingwei.imagecolorpickerview.pooling.AveragePooling
+import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
 class ImageColorPickerView @JvmOverloads constructor(
     context: Context,
@@ -21,6 +22,7 @@ class ImageColorPickerView @JvmOverloads constructor(
         get() = mSelectorStroke
         set(value) {
             mSelectorStroke = value
+            mSelectorStrokePaint.strokeWidth = value.toFloat()
             invalidate()
         }
 
@@ -64,6 +66,12 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    private var mPoolingFunc: PoolingFunction = AveragePooling
+    fun setPoolingFunc(func: PoolingFunction) {
+        mPoolingFunc = func
+    }
+
+
     // internal variables
     @ColorInt
     private var mSelectedColor: Int? = null
@@ -104,39 +112,33 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     init {
         val density = resources.displayMetrics.density
-        mSelectorRadius = (mSelectorRadius * density).toInt()
-        mSelectorOffsetX = (mSelectorOffsetX * density).toInt()
-        mSelectorOffsetY = (mSelectorOffsetY * density).toInt()
-        mSelectorStroke = (mSelectorStroke * density).toInt()
+        selectorRadius = (selectorRadius * density).toInt()
+        selectorOffsetX = (selectorOffsetX * density).toInt()
+        selectorOffsetY = (selectorOffsetY * density).toInt()
+        selectorStroke = (selectorStroke * density).toInt()
 
         attrs?.let {
             val a: TypedArray =
                 context.theme.obtainStyledAttributes(attrs, R.styleable.ImageColorPickerView, 0, 0)
 
             with(a) {
-                mSelectorRadius =
+                selectorRadius =
                     getDimension(R.styleable.ImageColorPickerView_selectorRadius, 10f).toInt()
-                mSelectorOffsetX =
+                selectorOffsetX =
                     getDimension(R.styleable.ImageColorPickerView_selectorOffsetX, 0f).toInt()
-                mSelectorOffsetY =
+                selectorOffsetY =
                     getDimension(R.styleable.ImageColorPickerView_selectorOffsetY, 0f).toInt()
-                mSelectorStroke =
+                selectorStroke =
                     getDimension(R.styleable.ImageColorPickerView_selectorStroke, 5f).toInt()
-                mSelectorProbeRadius =
+                selectorProbeRadius =
                     getInt(R.styleable.ImageColorPickerView_selectorProbeRadius, 10)
-                mEnable = getBoolean(R.styleable.ImageColorPickerView_enableSelector, true)
+                enable = getBoolean(R.styleable.ImageColorPickerView_enableSelector, true)
             }
         }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         // set up the image box position for drawing
-        val left = paddingLeft
-        val right = left + mImageViewWidth
-        val top = paddingTop
-        val bottom = top + mImageViewHeight
-        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
-
         mImageBitmap?.let {
             mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
         }
@@ -151,6 +153,12 @@ class ImageColorPickerView @JvmOverloads constructor(
         // get rid of padding area to get actual image size
         mImageViewWidth = width - paddingLeft - paddingRight
         mImageViewHeight = height - paddingTop - paddingBottom
+
+        val left = paddingLeft
+        val right = left + mImageViewWidth
+        val top = paddingTop
+        val bottom = top + mImageViewHeight
+        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
 
         setMeasuredDimension(width, height)
     }
@@ -266,8 +274,6 @@ class ImageColorPickerView @JvmOverloads constructor(
 
 
     private fun getProjectionColor(xPad: Int, yPad: Int): Int {
-        // TODO: better projection formula
-
         mResizedBitmap?.let { self ->
             val x = xPad - paddingLeft
             val y = yPad - paddingTop
@@ -278,30 +284,14 @@ class ImageColorPickerView @JvmOverloads constructor(
                 ?: run { self.width - 1 }
             val maxY = (y + mSelectorProbeRadius).takeIf { it < self.height }
                 ?: run { self.height - 1 }
-            val pixels = (maxX - minX + 1) * (maxY - minY + 1)
 
-            var rSum = 0f
-            var bSum = 0f
-            var gSum = 0f
-            var aSum = 0f
+            val probeWidth = maxX - minX + 1
+            val probeHeight = maxY - minY + 1
+            val pixelNum = probeWidth * probeHeight
+            val pixels = IntArray(pixelNum)
+            self.getPixels(pixels, 0, probeWidth, minX, minY, probeWidth, probeHeight)
 
-            for (i in minX..maxX) {
-                for (j in minY..maxY) {
-                    @ColorInt val color = self[i, j]
-
-                    rSum += Color.red(color)
-                    bSum += Color.blue(color)
-                    gSum += Color.green(color)
-                    aSum += Color.alpha(color)
-                }
-            }
-
-            val rAvg = rSum / pixels
-            val gAvg = gSum / pixels
-            val bAvg = bSum / pixels
-            val aAvg = aSum / pixels
-
-            return Color.argb(aAvg.toInt(), rAvg.toInt(), gAvg.toInt(), bAvg.toInt())
+            return mPoolingFunc.exec(pixels)
         }
 
         return 0xFFFFFF
