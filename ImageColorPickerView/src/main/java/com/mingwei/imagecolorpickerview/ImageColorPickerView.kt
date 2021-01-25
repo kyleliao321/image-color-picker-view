@@ -1,5 +1,6 @@
 package com.mingwei.imagecolorpickerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
@@ -65,8 +66,8 @@ class ImageColorPickerView @JvmOverloads constructor(
         }
 
     // internal variables
-    private lateinit var mImageBitmap: Bitmap
-    private lateinit var mResizedBitmap: Bitmap
+    private var mImageBitmap: Bitmap? = null
+    private var mResizedBitmap: Bitmap? = null
     private var mImageViewWidth: Int = 0
     private var mImageViewHeight: Int = 0
     private var mImageRec: RectF = RectF()
@@ -123,6 +124,19 @@ class ImageColorPickerView @JvmOverloads constructor(
         }
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        // set up the image box position for drawing
+        val left = paddingLeft
+        val right = left + mImageViewWidth
+        val top = paddingTop
+        val bottom = top + mImageViewHeight
+        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+
+        mImageBitmap?.let {
+            mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
+        }
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val minWidth = paddingLeft + paddingRight + suggestedMinimumWidth
         val minHeight = paddingBottom + paddingTop + suggestedMinimumHeight
@@ -132,17 +146,6 @@ class ImageColorPickerView @JvmOverloads constructor(
         // get rid of padding area to get actual image size
         mImageViewWidth = width - paddingLeft - paddingRight
         mImageViewHeight = height - paddingTop - paddingBottom
-
-        // set up the image box position for drawing
-        val left = paddingLeft
-        val right = left + mImageViewWidth
-        val top = paddingTop
-        val bottom = top + mImageViewHeight
-        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
-
-        mResizedBitmap = Bitmap.createScaledBitmap(mImageBitmap, mImageViewWidth, mImageViewHeight, false)
-        Log.d("${this::class.java}", "New bitmap size: (${mResizedBitmap.width}, ${mResizedBitmap.height})")
-        Log.d("${this::class.java}", "Image Box size: (${mImageViewWidth}, ${mImageViewHeight})")
 
         setMeasuredDimension(width, height)
     }
@@ -247,42 +250,46 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     private fun getProjectionColor(xPad: Int, yPad: Int): Int {
         // TODO: better projection formula
-        val x = xPad - paddingLeft
-        val y = yPad - paddingTop
-        Log.d("${this::class.java}", "Select color from ($x, $y)")
 
-        val minX = (x - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-        val minY = (y - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-        val maxX = (x + mSelectorProbeRadius).takeIf { it < mResizedBitmap.width }
-            ?: run { mResizedBitmap.width - 1 }
-        val maxY = (y + mSelectorProbeRadius).takeIf { it < mResizedBitmap.height }
-            ?: run { mResizedBitmap.height - 1 }
+        mResizedBitmap?.let { self ->
+            val x = xPad - paddingLeft
+            val y = yPad - paddingTop
+            Log.d("${this::class.java}", "Select color from ($x, $y)")
 
-        val pixels = (maxX - minX + 1) * (maxY - minY + 1)
+            val minX = (x - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val minY = (y - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val maxX = (x + mSelectorProbeRadius).takeIf { it < self.width }
+                ?: run { self.width - 1 }
+            val maxY = (y + mSelectorProbeRadius).takeIf { it < self.height }
+                ?: run { self.height - 1 }
+            val pixels = (maxX - minX + 1) * (maxY - minY + 1)
 
-        var rSum = 0f
-        var bSum = 0f
-        var gSum = 0f
-        var aSum = 0f
+            var rSum = 0f
+            var bSum = 0f
+            var gSum = 0f
+            var aSum = 0f
 
-        for (i in minX..maxX) {
-            for (j in minY..maxY) {
-                val color = Color.valueOf(mResizedBitmap[i, j])
+            for (i in minX..maxX) {
+                for (j in minY..maxY) {
+                    val color = Color.valueOf(self[i, j])
 
-                rSum += color.red()
-                bSum += color.blue()
-                gSum += color.green()
-                aSum += color.alpha()
+                    rSum += color.red()
+                    bSum += color.blue()
+                    gSum += color.green()
+                    aSum += color.alpha()
+                }
             }
+
+            val rAvg = rSum / pixels
+            val gAvg = gSum / pixels
+            val bAvg = bSum / pixels
+            val aAvg = aSum / pixels
+
+            val colorAvg = Color.valueOf(rAvg, gAvg, bAvg, aAvg)
+            return colorAvg.toArgb()
         }
 
-        val rAvg = rSum / pixels
-        val gAvg = gSum / pixels
-        val bAvg = bSum / pixels
-        val aAvg = aSum / pixels
-
-        val colorAvg = Color.valueOf(rAvg, gAvg, bAvg, aAvg)
-        return colorAvg.toArgb()
+        return 0
     }
 
     interface SelectColorListener {
