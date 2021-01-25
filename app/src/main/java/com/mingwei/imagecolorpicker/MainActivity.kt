@@ -12,12 +12,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
+import androidx.annotation.ColorInt
 import com.mingwei.imagecolorpickerview.ImageColorPickerView
 
 class MainActivity : AppCompatActivity() {
 
     private val listener = object : ImageColorPickerView.SelectColorListener {
-        override fun onSelectColor(color: Color) {
+        override fun onSelectColor(@ColorInt color: Int) {
             Log.d("${this::class.java}", color.toString())
         }
     }

@@ -1,6 +1,5 @@
 package com.mingwei.imagecolorpickerview
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
@@ -8,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.ColorInt
 import androidx.core.graphics.get
 
 class ImageColorPickerView @JvmOverloads constructor(
@@ -49,7 +49,7 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
-    private  var mSelectorProbeRadius: Int = 10
+    private var mSelectorProbeRadius: Int = 10
     var selectorProbeRadius: Int
         get() = mSelectorProbeRadius
         set(value) {
@@ -93,7 +93,7 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     fun setImageBitmap(bitmap: Bitmap) {
         // TODO: optimize memory usage
-        mImageBitmap = bitmap.copy(Bitmap.Config.RGBA_F16, true)
+        mImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
     }
 
     init {
@@ -238,7 +238,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     private fun emitColorUpdateEvent(event: MotionEvent) {
         val selectedColor = getProjectionColor(event.x.toInt(), event.y.toInt())
         for (listener in mSelectColorListeners) {
-            listener.onSelectColor(Color.valueOf(selectedColor))
+            listener.onSelectColor(selectedColor)
         }
     }
 
@@ -254,7 +254,6 @@ class ImageColorPickerView @JvmOverloads constructor(
         mResizedBitmap?.let { self ->
             val x = xPad - paddingLeft
             val y = yPad - paddingTop
-            Log.d("${this::class.java}", "Select color from ($x, $y)")
 
             val minX = (x - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
             val minY = (y - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
@@ -271,12 +270,12 @@ class ImageColorPickerView @JvmOverloads constructor(
 
             for (i in minX..maxX) {
                 for (j in minY..maxY) {
-                    val color = Color.valueOf(self[i, j])
+                    @ColorInt val color = self[i, j]
 
-                    rSum += color.red()
-                    bSum += color.blue()
-                    gSum += color.green()
-                    aSum += color.alpha()
+                    rSum += Color.red(color)
+                    bSum += Color.blue(color)
+                    gSum += Color.green(color)
+                    aSum += Color.alpha(color)
                 }
             }
 
@@ -285,15 +284,14 @@ class ImageColorPickerView @JvmOverloads constructor(
             val bAvg = bSum / pixels
             val aAvg = aSum / pixels
 
-            val colorAvg = Color.valueOf(rAvg, gAvg, bAvg, aAvg)
-            return colorAvg.toArgb()
+            return Color.argb(aAvg.toInt(), rAvg.toInt(), gAvg.toInt(), bAvg.toInt())
         }
 
-        return 0
+        return 0xFFFFFF
     }
 
     interface SelectColorListener {
-        fun onSelectColor(color: Color): Unit
+        fun onSelectColor(@ColorInt color: Int)
     }
 
 }
