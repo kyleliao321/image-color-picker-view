@@ -399,8 +399,26 @@ class ImageColorPickerView @JvmOverloads constructor(
 
 
     interface PickColorListener {
+        /**
+         * Called when user started to pick color on the screen.
+         *
+         * @param color Color in ARGB_8888 format
+         */
         fun onPickStarted(@ColorInt color: Int)
+
+        /**
+         * Called when user finished picking color on the screen.
+         *
+         * @param color Picked color in ARGB_8888 format.
+         */
         fun onColorPicked(@ColorInt color: Int)
+
+        /**
+         * Called when user move picker to another pixel on the screen.
+         *
+         * @param oldColor Last picked color in ARGB_8888 format, might be null.
+         * @param newColor Updated picked color ARGB_8888 format.
+         */
         fun onColorUpdated(@ColorInt oldColor: Int?, @ColorInt newColor: Int)
     }
 
