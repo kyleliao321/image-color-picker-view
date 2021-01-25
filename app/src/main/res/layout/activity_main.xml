@@ -14,8 +14,7 @@
             android:id="@+id/color_picker"
             android:layout_height="400dp"
             android:layout_width="400dp"
-            app:selectorRadius="10dp"
-            app:selectorStroke="5dp"
+            android:padding="20dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

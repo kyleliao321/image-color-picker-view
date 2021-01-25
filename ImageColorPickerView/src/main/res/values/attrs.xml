@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ImageColorPickerView">
-        <attr name="selectorRadius" format="dimension" />
-        <attr name="selectorOffsetX" format="dimension" />
-        <attr name="selectorOffsetY" format="dimension" />
-        <attr name="selectorProbeRadius" format="integer" />
-        <attr name="selectorStroke" format="dimension" />
-        <attr name="enableSelector" format="integer" />
+        <attr name="pickerRadius" format="dimension" />
+        <attr name="pickerOffsetX" format="dimension" />
+        <attr name="pickerOffsetY" format="dimension" />
+        <attr name="pickerProbeRadius" format="integer" />
+        <attr name="pickerStroke" format="dimension" />
+        <attr name="enablePicker" format="integer" />
     </declare-styleable>
 </resources>

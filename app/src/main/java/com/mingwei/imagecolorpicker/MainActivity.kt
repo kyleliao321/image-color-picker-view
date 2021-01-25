@@ -15,8 +15,8 @@ import com.mingwei.imagecolorpickerview.ImageColorPickerView
 
 class MainActivity : AppCompatActivity() {
 
-    private val listener = object : ImageColorPickerView.SelectColorListener {
-        override fun onColorSelected(@ColorInt color: Int) {
+    private val listener = object : ImageColorPickerView.PickColorListener {
+        override fun onColorPicked(@ColorInt color: Int) {
             Log.d("${this::class.java}", color.toString())
         }
 
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("${this::class.java}", "$oldColor updated to $newColor")
         }
 
-        override fun onSelectionStarted(color: Int) {
+        override fun onPickStarted(color: Int) {
             Log.d("${this::class.java}", "Color Selection started with $color")
         }
     }
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<ImageColorPickerView>(R.id.color_picker)
-            .setSelectColorListener(listener)
+            .setPickColorListener(listener)
 
         findViewById<SeekBar>(R.id.top_padding_seekbar)
             .setOnSeekBarChangeListener(topPaddingListener)
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
     private val probeSizeListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
             findViewById<ImageColorPickerView>(R.id.color_picker)
-                .selectorProbeRadius = p1
+                .pickerProbeRadius = p1
         }
 
         override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     private val selectorSizeListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
             findViewById<ImageColorPickerView>(R.id.color_picker)
-                .selectorRadius = p1
+                .pickerRadius = p1
         }
 
         override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
     private val offsetXListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
             findViewById<ImageColorPickerView>(R.id.color_picker)
-                .selectorOffsetX = p1
+                .pickerOffsetX = p1
         }
 
         override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity() {
     private val offsetYListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
             findViewById<ImageColorPickerView>(R.id.color_picker)
-                .selectorOffsetY = p1
+                .pickerOffsetY = p1
         }
 
         override fun onStartTrackingTouch(p0: SeekBar?) {}

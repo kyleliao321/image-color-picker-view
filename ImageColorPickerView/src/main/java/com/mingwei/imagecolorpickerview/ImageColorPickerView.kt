@@ -10,6 +10,24 @@ import androidx.annotation.ColorInt
 import com.mingwei.imagecolorpickerview.pooling.AveragePooling
 import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
+/**
+ * A ImageColorPickerView which allow user to pick color from provided image,
+ * feature includes:
+ * <ul>
+ *     <li> Allow clients custom radius of picker and stroke of picker.
+ *     <li> Allow clients custom position of picker relative to touch point.
+ *     <li> Allow clients decide how to choose color from a touch point.
+ *     <li> Provide suitable callback for pick color event.
+ * </ul>
+ *
+ * @property enablePicker Enable picker or not.
+ * @property pickerOffsetX X-axis offset from user's touch point which will be calculated when showing picker.
+ * @property pickerOffsetY Y-axis offset from user's touch point which will be calculated when showing picker.
+ * @property pickerStroke Stroke's width of picker.
+ * @property pickerRadius Radius of picker.
+ * @property pickerProbeRadius Radius from user's touch point. Given a touch point as a center, ImageColorView will
+ *                             use this radius to pool the color from nearby pixels.
+ */
 class ImageColorPickerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -17,52 +35,52 @@ class ImageColorPickerView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     // external variables
-    private var mSelectorStroke: Int = 5
-    var selectorStroke: Int
-        get() = mSelectorStroke
+    private var mPickerStroke: Int = 5
+    var pickerStroke: Int
+        get() = mPickerStroke
         set(value) {
-            mSelectorStroke = value
-            mSelectorStrokePaint.strokeWidth = value.toFloat()
+            mPickerStroke = value
+            mPickerStrokePaint.strokeWidth = value.toFloat()
             invalidate()
         }
 
-    private var mSelectorRadius: Int = 10
-    var selectorRadius: Int
-        get() = mSelectorRadius
+    private var mPickerRadius: Int = 10
+    var pickerRadius: Int
+        get() = mPickerRadius
         set(value) {
-            mSelectorRadius = value
+            mPickerRadius = value
             invalidate()
         }
 
-    private var mSelectorOffsetX: Int = 0
-    var selectorOffsetX: Int
-        get() = mSelectorOffsetX
+    private var mPickerOffsetX: Int = 0
+    var pickerOffsetX: Int
+        get() = mPickerOffsetX
         set(value) {
-            mSelectorOffsetX = value
+            mPickerOffsetX = value
             invalidate()
         }
 
-    private var mSelectorOffsetY: Int = 0
-    var selectorOffsetY: Int
-        get() = mSelectorOffsetY
+    private var mPickerOffsetY: Int = 0
+    var pickerOffsetY: Int
+        get() = mPickerOffsetY
         set(value) {
-            mSelectorOffsetY = value
+            mPickerOffsetY = value
             invalidate()
         }
 
-    private var mSelectorProbeRadius: Int = 10
-    var selectorProbeRadius: Int
-        get() = mSelectorProbeRadius
+    private var mPickerProbeRadius: Int = 10
+    var pickerProbeRadius: Int
+        get() = mPickerProbeRadius
         set(value) {
-            mSelectorProbeRadius = value
+            mPickerProbeRadius = value
             invalidate()
         }
 
-    private var mEnable: Boolean = true
-    var enable: Boolean
-        get() = mEnable
+    private var mEnablePicker: Boolean = true
+    var enablePicker: Boolean
+        get() = mEnablePicker
         set(value) {
-            mEnable = value
+            mEnablePicker = value
             invalidate()
         }
 
@@ -74,9 +92,9 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     // internal variables
     @ColorInt
-    private var mSelectedColor: Int? = null
+    private var mPickColor: Int? = null
 
-    private var mSelectColorListeners: SelectColorListener? = null
+    private var mPickColorListener: PickColorListener? = null
     private var mImageBitmap: Bitmap? = null
     private var mResizedBitmap: Bitmap? = null
     private var mImageViewWidth: Int = 0
@@ -85,24 +103,23 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     private var mSelectorPositionX: Float = -1.0f
     private var mSelectorPositionY: Float = -1.0f
-    private var mShowSelector: Boolean = false
+    private var mShowPicker: Boolean = false
 
-    private val mSelectorPaint = Paint().apply {
+    private val mPickerPaint = Paint().apply {
         color = Color.BLACK
     }
-    private val mSelectorStrokePaint = Paint().apply {
+    private val mPickerStrokePaint = Paint().apply {
         color = Color.WHITE
-        strokeWidth = mSelectorStroke.toFloat()
+        strokeWidth = mPickerStroke.toFloat()
         style = Paint.Style.STROKE
     }
 
-    fun setSelectColorListener(listener: SelectColorListener) {
-        mSelectColorListeners = listener
+    fun setPickColorListener(listener: PickColorListener) {
+        mPickColorListener = listener
     }
 
 
     fun setImageBitmap(bitmap: Bitmap) {
-        // TODO: optimize memory usage
         mImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         mImageBitmap?.let {
             mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
@@ -112,33 +129,39 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     init {
         val density = resources.displayMetrics.density
-        selectorRadius = (selectorRadius * density).toInt()
-        selectorOffsetX = (selectorOffsetX * density).toInt()
-        selectorOffsetY = (selectorOffsetY * density).toInt()
-        selectorStroke = (selectorStroke * density).toInt()
+        pickerRadius = (pickerRadius * density).toInt()
+        pickerOffsetX = (pickerOffsetX * density).toInt()
+        pickerOffsetY = (pickerOffsetY * density).toInt()
+        pickerStroke = (pickerStroke * density).toInt()
 
         attrs?.let {
             val a: TypedArray =
                 context.theme.obtainStyledAttributes(attrs, R.styleable.ImageColorPickerView, 0, 0)
 
             with(a) {
-                selectorRadius =
-                    getDimension(R.styleable.ImageColorPickerView_selectorRadius, 10f).toInt()
-                selectorOffsetX =
-                    getDimension(R.styleable.ImageColorPickerView_selectorOffsetX, 0f).toInt()
-                selectorOffsetY =
-                    getDimension(R.styleable.ImageColorPickerView_selectorOffsetY, 0f).toInt()
-                selectorStroke =
-                    getDimension(R.styleable.ImageColorPickerView_selectorStroke, 5f).toInt()
-                selectorProbeRadius =
-                    getInt(R.styleable.ImageColorPickerView_selectorProbeRadius, 10)
-                enable = getBoolean(R.styleable.ImageColorPickerView_enableSelector, true)
+                pickerRadius =
+                    getDimension(R.styleable.ImageColorPickerView_pickerRadius, 10f).toInt()
+                pickerOffsetX =
+                    getDimension(R.styleable.ImageColorPickerView_pickerOffsetX, 0f).toInt()
+                pickerOffsetY =
+                    getDimension(R.styleable.ImageColorPickerView_pickerOffsetY, 0f).toInt()
+                pickerStroke =
+                    getDimension(R.styleable.ImageColorPickerView_pickerStroke, 5f).toInt()
+                pickerProbeRadius =
+                    getInt(R.styleable.ImageColorPickerView_pickerProbeRadius, 10)
+                enablePicker = getBoolean(R.styleable.ImageColorPickerView_enablePicker, true)
             }
         }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         // set up the image box position for drawing
+        val left = paddingLeft
+        val right = left + mImageViewWidth
+        val top = paddingTop
+        val bottom = top + mImageViewHeight
+        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+
         mImageBitmap?.let {
             mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
         }
@@ -154,12 +177,6 @@ class ImageColorPickerView @JvmOverloads constructor(
         mImageViewWidth = width - paddingLeft - paddingRight
         mImageViewHeight = height - paddingTop - paddingBottom
 
-        val left = paddingLeft
-        val right = left + mImageViewWidth
-        val top = paddingTop
-        val bottom = top + mImageViewHeight
-        mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
-
         setMeasuredDimension(width, height)
     }
 
@@ -170,18 +187,18 @@ class ImageColorPickerView @JvmOverloads constructor(
             mResizedBitmap?.let {
                 drawBitmap(it, null, mImageRec, null)
 
-                if (mShowSelector) {
+                if (mShowPicker) {
                     drawCircle(
-                        mSelectorPositionX + mSelectorOffsetX,
-                        mSelectorPositionY + mSelectorOffsetY,
-                        mSelectorRadius.toFloat(),
-                        mSelectorPaint
+                        mSelectorPositionX + mPickerOffsetX,
+                        mSelectorPositionY + mPickerOffsetY,
+                        mPickerRadius.toFloat(),
+                        mPickerPaint
                     )
                     drawCircle(
-                        mSelectorPositionX + mSelectorOffsetX,
-                        mSelectorPositionY + mSelectorOffsetY,
-                        mSelectorRadius.toFloat(),
-                        mSelectorStrokePaint
+                        mSelectorPositionX + mPickerOffsetX,
+                        mSelectorPositionY + mPickerOffsetY,
+                        mPickerRadius.toFloat(),
+                        mPickerStrokePaint
                     )
                 }
             }
@@ -189,7 +206,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!mEnable || mResizedBitmap == null) {
+        if (!mEnablePicker || mResizedBitmap == null) {
             return false
         }
 
@@ -197,19 +214,19 @@ class ImageColorPickerView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 // show selector at given position
                 parent.requestDisallowInterceptTouchEvent(true)
-                initSelector(event)
+                initPicker(event)
                 true
             }
             MotionEvent.ACTION_MOVE -> {
                 // update selector color
-                updateSelector(event)
+                updatePicker(event)
                 true
             }
             MotionEvent.ACTION_UP -> {
                 // hide selector at reset position to 0
                 parent.requestDisallowInterceptTouchEvent(false)
-                hideSelector()
-                emitColorUpdateEvent(event)
+                hidePicker()
+                emitColorPickedEvent(event)
                 true
             }
             else -> true
@@ -217,54 +234,53 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     /**
-     * Initialize selector's position and redraw the view
+     * Initialize picker's position and emit onPickStarted event.
      */
-    private fun initSelector(event: MotionEvent) {
+    private fun initPicker(event: MotionEvent) {
         if (touchInBound(event)) {
             // make selector visible
-            mShowSelector = true
+            mShowPicker = true
             mSelectorPositionX = event.x
             mSelectorPositionY = event.y
 
             // trigger callback to notify client that user has started to select color
-            val newColor = getProjectionColor(event.x.toInt(), event.y.toInt())
-            mSelectColorListeners?.onSelectionStarted(newColor)
+            val newColor = poolColor(event.x.toInt(), event.y.toInt())
+            mPickColorListener?.onPickStarted(newColor)
 
             // cache new color and apply it to paint object
-            mSelectedColor = newColor
-            mSelectorPaint.color = mSelectedColor ?: Color.WHITE
+            mPickColor = newColor
+            mPickerPaint.color = mPickColor ?: Color.WHITE
             invalidate()
         }
     }
 
     /**
-     * Update the position of selector,
-     * if the touch event is outside the image box,
+     * Update the position of picker, and emit onColorUpdated event.
      */
-    private fun updateSelector(event: MotionEvent) {
+    private fun updatePicker(event: MotionEvent) {
         if (touchInBound(event)) {
             mSelectorPositionX = event.x
             mSelectorPositionY = event.y
 
             // trigger callback to notify client that user moved the selector to different color
-            val newColor = getProjectionColor(event.x.toInt(), event.y.toInt())
-            mSelectColorListeners?.onColorUpdated(mSelectedColor, newColor)
+            val newColor = poolColor(event.x.toInt(), event.y.toInt())
+            mPickColorListener?.onColorUpdated(mPickColor, newColor)
 
             //
-            mSelectedColor = newColor
-            mSelectorPaint.color = mSelectedColor ?: Color.WHITE
+            mPickColor = newColor
+            mPickerPaint.color = mPickColor ?: Color.WHITE
             invalidate()
         }
     }
 
-    private fun hideSelector() {
-        mShowSelector = false
+    private fun hidePicker() {
+        mShowPicker = false
         invalidate()
     }
 
-    private fun emitColorUpdateEvent(event: MotionEvent) {
-        val selectedColor = getProjectionColor(event.x.toInt(), event.y.toInt())
-        mSelectColorListeners?.onColorSelected(selectedColor)
+    private fun emitColorPickedEvent(event: MotionEvent) {
+        val selectedColor = poolColor(event.x.toInt(), event.y.toInt())
+        mPickColorListener?.onColorPicked(selectedColor)
     }
 
     private fun touchInBound(event: MotionEvent): Boolean {
@@ -273,16 +289,16 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
 
-    private fun getProjectionColor(xPad: Int, yPad: Int): Int {
+    private fun poolColor(xPad: Int, yPad: Int): Int {
         mResizedBitmap?.let { self ->
             val x = xPad - paddingLeft
             val y = yPad - paddingTop
 
-            val minX = (x - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-            val minY = (y - mSelectorProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-            val maxX = (x + mSelectorProbeRadius).takeIf { it < self.width }
+            val minX = (x - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val minY = (y - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val maxX = (x + mPickerProbeRadius).takeIf { it < self.width }
                 ?: run { self.width - 1 }
-            val maxY = (y + mSelectorProbeRadius).takeIf { it < self.height }
+            val maxY = (y + mPickerProbeRadius).takeIf { it < self.height }
                 ?: run { self.height - 1 }
 
             val probeWidth = maxX - minX + 1
@@ -297,9 +313,9 @@ class ImageColorPickerView @JvmOverloads constructor(
         return 0xFFFFFF
     }
 
-    interface SelectColorListener {
-        fun onSelectionStarted(@ColorInt color: Int)
-        fun onColorSelected(@ColorInt color: Int)
+    interface PickColorListener {
+        fun onPickStarted(@ColorInt color: Int)
+        fun onColorPicked(@ColorInt color: Int)
         fun onColorUpdated(@ColorInt oldColor: Int?, @ColorInt newColor: Int)
     }
 
