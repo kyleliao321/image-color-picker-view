@@ -296,8 +296,10 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     private fun emitColorPickedEvent(event: MotionEvent) {
-        val selectedColor = poolColor(event.x.toInt(), event.y.toInt())
-        mPickColorListener?.onColorPicked(selectedColor)
+        if (mResizedBitmap != null) {
+            val selectedColor = poolColor(event.x.toInt(), event.y.toInt())
+            mPickColorListener?.onColorPicked(selectedColor)
+        }
     }
 
     /**
