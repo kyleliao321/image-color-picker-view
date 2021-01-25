@@ -15,15 +15,38 @@ class ImageColorPickerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private lateinit var mImageBitmap: Bitmap
-    private lateinit var mResizedBitmap: Bitmap
-    private var mImageViewWidth: Int = 0
-    private var mImageViewHeight: Int = 0
+    // external variables
     private var mSelectorRadius: Int = 50
-    private var mSelectorOffsetX: Int = 0
-    private var mSelectorOffsetY: Int = 0
-    private var mImageRec: RectF = RectF()
+    var selectorRadius: Int
+        get() = mSelectorRadius
+        set(value) {
+            mSelectorRadius = value
+            invalidate()
+        }
 
+    private var mSelectorOffsetX: Int = 0
+    var selectorOffsetX: Int
+        get() = mSelectorOffsetX
+        set(value) {
+            mSelectorOffsetX = value
+            invalidate()
+        }
+
+    private var mSelectorOffsetY: Int = 0
+    var selectorOffsetY: Int
+        get() = mSelectorOffsetY
+        set(value) {
+            mSelectorOffsetY = value
+            invalidate()
+        }
+
+    private  var mSelectorProbeRadius: Int = 10
+    var selectorProbeRadius: Int
+        get() = mSelectorProbeRadius
+        set(value) {
+            mSelectorProbeRadius = value
+            invalidate()
+        }
 
     private var mEnable: Boolean = true
     var enable: Boolean
@@ -33,8 +56,15 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    // internal variables
+    private lateinit var mImageBitmap: Bitmap
+    private lateinit var mResizedBitmap: Bitmap
+    private var mImageViewWidth: Int = 0
+    private var mImageViewHeight: Int = 0
+    private var mImageRec: RectF = RectF()
+
+
     private val mSelectColorListeners = ArrayList<SelectColorListener>()
-    private var mSelectorProbeRadius: Int = 10
     private var mSelectorPositionX: Float = -1.0f
     private var mSelectorPositionY: Float = -1.0f
     private var mShowSelector: Boolean = false
@@ -55,22 +85,6 @@ class ImageColorPickerView @JvmOverloads constructor(
     fun setImageBitmap(bitmap: Bitmap) {
         // TODO: optimize memory usage
         mImageBitmap = bitmap.copy(Bitmap.Config.RGBA_F16, true)
-    }
-
-    fun setProbeSize(size: Int) {
-        mSelectorProbeRadius = size
-    }
-
-    fun setSelectorSize(size: Int) {
-        mSelectorRadius = size
-    }
-
-    fun setSelectorOffsetX(offsetX: Int) {
-        mSelectorOffsetX = offsetX
-    }
-
-    fun setSelectorOffsetY(offsetY: Int) {
-        mSelectorOffsetY = offsetY
     }
 
     init {
