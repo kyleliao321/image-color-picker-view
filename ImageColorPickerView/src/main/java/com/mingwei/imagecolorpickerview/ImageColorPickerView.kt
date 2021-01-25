@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
@@ -66,14 +65,16 @@ class ImageColorPickerView @JvmOverloads constructor(
         }
 
     // internal variables
+    @ColorInt
+    private var mSelectedColor: Int? = null
+
+    private var mSelectColorListeners: SelectColorListener? = null
     private var mImageBitmap: Bitmap? = null
     private var mResizedBitmap: Bitmap? = null
     private var mImageViewWidth: Int = 0
     private var mImageViewHeight: Int = 0
     private var mImageRec: RectF = RectF()
 
-
-    private val mSelectColorListeners = ArrayList<SelectColorListener>()
     private var mSelectorPositionX: Float = -1.0f
     private var mSelectorPositionY: Float = -1.0f
     private var mShowSelector: Boolean = false
@@ -86,10 +87,10 @@ class ImageColorPickerView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
-
-    fun addSelectColorListener(listener: SelectColorListener) {
-        mSelectColorListeners.add(listener)
+    fun setSelectColorListener(listener: SelectColorListener) {
+        mSelectColorListeners = listener
     }
+
 
     fun setImageBitmap(bitmap: Bitmap) {
         // TODO: optimize memory usage
@@ -208,10 +209,18 @@ class ImageColorPickerView @JvmOverloads constructor(
      */
     private fun initSelector(event: MotionEvent) {
         if (touchInBound(event)) {
+            // make selector visible
             mShowSelector = true
             mSelectorPositionX = event.x
             mSelectorPositionY = event.y
-            mSelectorPaint.color = getProjectionColor(event.x.toInt(), event.y.toInt())
+
+            // trigger callback to notify client that user has started to select color
+            val newColor = getProjectionColor(event.x.toInt(), event.y.toInt())
+            mSelectColorListeners?.onSelectionStarted(newColor)
+
+            // cache new color and apply it to paint object
+            mSelectedColor = newColor
+            mSelectorPaint.color = mSelectedColor ?: Color.WHITE
             invalidate()
         }
     }
@@ -222,10 +231,16 @@ class ImageColorPickerView @JvmOverloads constructor(
      */
     private fun updateSelector(event: MotionEvent) {
         if (touchInBound(event)) {
-            Log.d("${this::class.java}", "Move to (${event.x}, ${event.y})")
             mSelectorPositionX = event.x
             mSelectorPositionY = event.y
-            mSelectorPaint.color = getProjectionColor(event.x.toInt(), event.y.toInt())
+
+            // trigger callback to notify client that user moved the selector to different color
+            val newColor = getProjectionColor(event.x.toInt(), event.y.toInt())
+            mSelectColorListeners?.onColorUpdated(mSelectedColor, newColor)
+
+            //
+            mSelectedColor = newColor
+            mSelectorPaint.color = mSelectedColor ?: Color.WHITE
             invalidate()
         }
     }
@@ -237,9 +252,7 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     private fun emitColorUpdateEvent(event: MotionEvent) {
         val selectedColor = getProjectionColor(event.x.toInt(), event.y.toInt())
-        for (listener in mSelectColorListeners) {
-            listener.onSelectColor(selectedColor)
-        }
+        mSelectColorListeners?.onColorSelected(selectedColor)
     }
 
     private fun touchInBound(event: MotionEvent): Boolean {
@@ -291,7 +304,9 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     interface SelectColorListener {
-        fun onSelectColor(@ColorInt color: Int)
+        fun onSelectionStarted(@ColorInt color: Int)
+        fun onColorSelected(@ColorInt color: Int)
+        fun onColorUpdated(@ColorInt oldColor: Int?, @ColorInt newColor: Int)
     }
 
 }

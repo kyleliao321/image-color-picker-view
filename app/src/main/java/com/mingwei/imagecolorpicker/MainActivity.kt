@@ -1,11 +1,9 @@
 package com.mingwei.imagecolorpicker
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -13,13 +11,22 @@ import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AppCompatActivity
 import com.mingwei.imagecolorpickerview.ImageColorPickerView
 
 class MainActivity : AppCompatActivity() {
 
     private val listener = object : ImageColorPickerView.SelectColorListener {
-        override fun onSelectColor(@ColorInt color: Int) {
+        override fun onColorSelected(@ColorInt color: Int) {
             Log.d("${this::class.java}", color.toString())
+        }
+
+        override fun onColorUpdated(oldColor: Int?, newColor: Int) {
+            Log.d("${this::class.java}", "$oldColor updated to $newColor")
+        }
+
+        override fun onSelectionStarted(color: Int) {
+            Log.d("${this::class.java}", "Color Selection started with $color")
         }
     }
 
@@ -28,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<ImageColorPickerView>(R.id.color_picker)
-            .addSelectColorListener(listener)
+            .setSelectColorListener(listener)
 
         findViewById<SeekBar>(R.id.top_padding_seekbar)
             .setOnSeekBarChangeListener(topPaddingListener)
