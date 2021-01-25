@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
 	    super.onCreate(savedInstanceState)
 	    setContentView(R.layout.activity_main)
 
-		// bind click listener to open photo gallery
+        // bind click listener to open photo gallery
 	    val button = findViewById<Button>(R.id.select_image_button)
 	    button.setOnClickListener {
 		  openGallery()
@@ -111,9 +111,9 @@ class MainActivity : AppCompatActivity() {
 	    when (requestCode) {
 	        PHOTO_GALLERY -> {
 	            val uriString = data?.dataString
-				val uri = Uri.parse(uriString)
+	            val uri = Uri.parse(uriString)
 
-				// decode bitmap based on different SDK version
+	            // decode bitmap based on different SDK version
 	            val bitmap = if (Build.VERSION.SDK_INT < 28) {
 	                MediaStore.Images.Media.getBitmap(contentResolver, uri)
 	            } else {
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 	                ImageDecoder.decodeBitmap(src)
 	            }
 
-			    // set bitmap as image source
+	            // set bitmap as image source
 	            findViewById<ImageColorPickerView>(R.id.color_picker)
 	                .setImage(bitmap)
 	        }
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity() {
 	    super.onCreate(savedInstanceState)
 	    setContentView(R.layout.activity_main)
 
-		// bind click listener to open photo gallery
+	    // bind click listener to open photo gallery
 	    val button = findViewById<Button>(R.id.select_image_button)
 	    button.setOnClickListener {
 		  openGallery()
@@ -161,9 +161,9 @@ class MainActivity : AppCompatActivity() {
 	    when (requestCode) {
 	        PHOTO_GALLERY -> {
 	            val uriString = data?.dataString
-				val uri = Uri.parse(uriString)
+	            val uri = Uri.parse(uriString)
 
-			    // set uri as image source
+	            // set uri as image source
 	            findViewById<ImageColorPickerView>(R.id.color_picker)
 	                .setImage(uri )
 	        }
