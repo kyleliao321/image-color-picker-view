@@ -83,9 +83,6 @@ class MainActivity : AppCompatActivity() {
 
                 findViewById<ImageColorPickerView>(R.id.color_picker)
                     .setImageBitmap(bitmap)
-
-                findViewById<ImageColorPickerView>(R.id.color_picker)
-                    .visibility = View.VISIBLE
             }
         }
     }

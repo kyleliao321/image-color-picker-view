@@ -78,6 +78,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     private var mSelectorPositionX: Float = -1.0f
     private var mSelectorPositionY: Float = -1.0f
     private var mShowSelector: Boolean = false
+
     private val mSelectorPaint = Paint().apply {
         color = Color.BLACK
     }
@@ -95,10 +96,13 @@ class ImageColorPickerView @JvmOverloads constructor(
     fun setImageBitmap(bitmap: Bitmap) {
         // TODO: optimize memory usage
         mImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        mImageBitmap?.let {
+            mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
+        }
+        invalidate()
     }
 
     init {
-
         val density = resources.displayMetrics.density
         mSelectorRadius = (mSelectorRadius * density).toInt()
         mSelectorOffsetX = (mSelectorOffsetX * density).toInt()
@@ -177,7 +181,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!mEnable) {
+        if (!mEnable || mResizedBitmap == null) {
             return false
         }
 
