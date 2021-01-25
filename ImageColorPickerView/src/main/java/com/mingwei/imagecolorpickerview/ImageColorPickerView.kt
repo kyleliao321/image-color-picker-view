@@ -3,10 +3,17 @@ package com.mingwei.imagecolorpickerview
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
+import androidx.core.content.res.ResourcesCompat
 import com.mingwei.imagecolorpickerview.pooling.AveragePooling
 import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
@@ -26,8 +33,6 @@ class ImageColorPickerView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
-    // external variables
 
     /**
      * Width of picker's stroke
@@ -107,14 +112,12 @@ class ImageColorPickerView @JvmOverloads constructor(
         mPoolingFunc = func
     }
 
-
-    // internal variables
     @ColorInt
     private var mPickColor: Int? = null
 
     private var mPickColorListener: PickColorListener? = null
-    private var mImageBitmap: Bitmap? = null
-    private var mResizedBitmap: Bitmap? = null
+    private var mProjectedBitmap: Bitmap? = null
+    private var mOriginalBitmap: Bitmap? = null
     private var mImageViewWidth: Int = 0
     private var mImageViewHeight: Int = 0
     private var mImageRec: RectF = RectF()
@@ -136,12 +139,50 @@ class ImageColorPickerView @JvmOverloads constructor(
         mPickColorListener = listener
     }
 
-    fun setImageBitmap(bitmap: Bitmap) {
-        mImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        mImageBitmap?.let {
-            mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
-        }
+    fun setImage(uri: Uri) {
+        val originalBitmap = decodeUri(uri)
+        setImage(originalBitmap)
+        originalBitmap.recycle()
         invalidate()
+    }
+
+    fun setImage(bitmap: Bitmap) {
+        mOriginalBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        projectBitmap()
+        invalidate()
+    }
+
+    fun setImage(drawable: Drawable) {
+        // create an empty placeholder bitmap
+        val originalBitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+
+        // bind a canvas to placeholder bitmap
+        val canvas = Canvas(originalBitmap)
+
+        // draw on to the canvas that bind with placeholder bitmap
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+
+        setImage(originalBitmap)
+        originalBitmap.recycle()
+        invalidate()
+    }
+
+    fun setImage(@DrawableRes id: Int) {
+        try {
+            val drawable = ResourcesCompat.getDrawable(
+                context.applicationContext.resources,
+                id,
+                null
+            )
+            drawable?.let { setImage(it) }
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Unable to find resource: $id $e")
+        }
     }
 
     init {
@@ -172,6 +213,10 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        // get rid of padding area to get actual image size
+        mImageViewWidth = width - paddingLeft - paddingRight
+        mImageViewHeight = height - paddingTop - paddingBottom
+
         // set up the image box position for drawing
         val left = paddingLeft
         val right = left + mImageViewWidth
@@ -179,9 +224,8 @@ class ImageColorPickerView @JvmOverloads constructor(
         val bottom = top + mImageViewHeight
         mImageRec.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
 
-        mImageBitmap?.let {
-            mResizedBitmap = Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
-        }
+        // re-scale bitmap
+        projectBitmap()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -189,11 +233,6 @@ class ImageColorPickerView @JvmOverloads constructor(
         val minHeight = paddingBottom + paddingTop + suggestedMinimumHeight
         val width = resolveSizeAndState(minWidth, widthMeasureSpec, 1)
         val height = resolveSizeAndState(minHeight, heightMeasureSpec, 0)
-
-        // get rid of padding area to get actual image size
-        mImageViewWidth = width - paddingLeft - paddingRight
-        mImageViewHeight = height - paddingTop - paddingBottom
-
         setMeasuredDimension(width, height)
     }
 
@@ -201,7 +240,7 @@ class ImageColorPickerView @JvmOverloads constructor(
         super.onDraw(canvas)
 
         canvas.apply {
-            mResizedBitmap?.let {
+            mProjectedBitmap?.let {
                 drawBitmap(it, null, mImageRec, null)
 
                 if (mShowPicker) {
@@ -223,7 +262,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!mEnablePicker || mResizedBitmap == null) {
+        if (!mEnablePicker || mProjectedBitmap == null) {
             return false
         }
 
@@ -296,7 +335,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     private fun emitColorPickedEvent(event: MotionEvent) {
-        if (mResizedBitmap != null) {
+        if (mProjectedBitmap != null) {
             val selectedColor = poolColor(event.x.toInt(), event.y.toInt())
             mPickColorListener?.onColorPicked(selectedColor)
         }
@@ -315,7 +354,7 @@ class ImageColorPickerView @JvmOverloads constructor(
      * Pool the color from given coordination.
      */
     private fun poolColor(xPad: Int, yPad: Int): Int {
-        mResizedBitmap?.let { self ->
+        mProjectedBitmap?.let { self ->
             // Since the bitmap has already been scaled to fit the actual showing image size,
             // the corresponding coordination of pixels in bitmap is just relative to the padding.
             val x = xPad - paddingLeft
@@ -343,10 +382,33 @@ class ImageColorPickerView @JvmOverloads constructor(
         return 0xFFFFFF
     }
 
+    private fun decodeUri(uri: Uri): Bitmap {
+        return if (Build.VERSION.SDK_INT >= 28) {
+            val src = ImageDecoder.createSource(context.contentResolver, uri)
+            ImageDecoder.decodeBitmap(src)
+        } else {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        }
+    }
+
+    private fun projectBitmap() {
+        if (mImageViewWidth > 0 && mImageViewHeight > 0) {
+            mOriginalBitmap?.let {
+                mProjectedBitmap =
+                    Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
+            }
+        }
+    }
+
+
     interface PickColorListener {
         fun onPickStarted(@ColorInt color: Int)
         fun onColorPicked(@ColorInt color: Int)
         fun onColorUpdated(@ColorInt oldColor: Int?, @ColorInt newColor: Int)
+    }
+
+    companion object {
+        const val LOG_TAG = "ImageColorPickerView"
     }
 
 }

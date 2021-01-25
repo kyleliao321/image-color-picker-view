@@ -31,7 +31,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
+
+        findViewById<ImageColorPickerView>(R.id.color_picker)
+            .setImage(R.drawable.ic_android_black_24dp)
 
         findViewById<ImageColorPickerView>(R.id.color_picker)
             .setPickColorListener(listener)
@@ -69,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 findViewById<ImageColorPickerView>(R.id.color_picker)
-                    .setImageBitmap(bitmap)
+                    .setImage(bitmap)
             }
         }
     }
