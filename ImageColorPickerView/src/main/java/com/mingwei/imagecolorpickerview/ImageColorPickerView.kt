@@ -31,7 +31,6 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     /**
      * Width of picker's stroke
-     * Unit: density-independent pixels (dp)
      */
     private var mPickerStroke: Int = 5
     var pickerStroke: Int
@@ -44,7 +43,6 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     /**
      * Radius of picker
-     * Unit: density-independent pixels (dp)
      */
     private var mPickerRadius: Int = 10
     var pickerRadius: Int
@@ -56,7 +54,6 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     /**
      * X-axis offset from user's touch point which will be calculated when showing picker.
-     * Unit: density-independent pixels (dp)
      */
     private var mPickerOffsetX: Int = 0
     var pickerOffsetX: Int
@@ -68,7 +65,6 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     /**
      * Y-axis offset from user's touch point which will be calculated when showing picker.
-     * Unit: density-independent pixels (dp)
      */
     private var mPickerOffsetY: Int = 0
     var pickerOffsetY: Int
