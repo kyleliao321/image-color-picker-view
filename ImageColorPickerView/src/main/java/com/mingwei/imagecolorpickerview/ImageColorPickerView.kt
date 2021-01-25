@@ -20,13 +20,6 @@ import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
  *     <li> Provide suitable callback for pick color event.
  * </ul>
  *
- * @property enablePicker Enable picker or not.
- * @property pickerOffsetX X-axis offset from user's touch point which will be calculated when showing picker.
- * @property pickerOffsetY Y-axis offset from user's touch point which will be calculated when showing picker.
- * @property pickerStroke Stroke's width of picker.
- * @property pickerRadius Radius of picker.
- * @property pickerProbeRadius Radius from user's touch point. Given a touch point as a center, ImageColorView will
- *                             use this radius to pool the color from nearby pixels.
  */
 class ImageColorPickerView @JvmOverloads constructor(
     context: Context,
@@ -35,6 +28,11 @@ class ImageColorPickerView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     // external variables
+
+    /**
+     * Width of picker's stroke
+     * Unit: density-independent pixels (dp)
+     */
     private var mPickerStroke: Int = 5
     var pickerStroke: Int
         get() = mPickerStroke
@@ -44,6 +42,10 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * Radius of picker
+     * Unit: density-independent pixels (dp)
+     */
     private var mPickerRadius: Int = 10
     var pickerRadius: Int
         get() = mPickerRadius
@@ -52,6 +54,10 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * X-axis offset from user's touch point which will be calculated when showing picker.
+     * Unit: density-independent pixels (dp)
+     */
     private var mPickerOffsetX: Int = 0
     var pickerOffsetX: Int
         get() = mPickerOffsetX
@@ -60,6 +66,10 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * Y-axis offset from user's touch point which will be calculated when showing picker.
+     * Unit: density-independent pixels (dp)
+     */
     private var mPickerOffsetY: Int = 0
     var pickerOffsetY: Int
         get() = mPickerOffsetY
@@ -68,6 +78,12 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * Radius from user's touch point. Unit: number of pixel
+     *
+     * ImageColorPickerView will use user's touch point and this radius to extract
+     * pixels from surrounding area for color pooling.
+     */
     private var mPickerProbeRadius: Int = 10
     var pickerProbeRadius: Int
         get() = mPickerProbeRadius
@@ -76,6 +92,9 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * Enable picker when user touch the image view or not.
+     */
     private var mEnablePicker: Boolean = true
     var enablePicker: Boolean
         get() = mEnablePicker
@@ -84,6 +103,9 @@ class ImageColorPickerView @JvmOverloads constructor(
             invalidate()
         }
 
+    /**
+     * Pooling function which will be used for selecting color from probe area's pixels.
+     */
     private var mPoolingFunc: PoolingFunction = AveragePooling
     fun setPoolingFunc(func: PoolingFunction) {
         mPoolingFunc = func
@@ -117,7 +139,6 @@ class ImageColorPickerView @JvmOverloads constructor(
     fun setPickColorListener(listener: PickColorListener) {
         mPickColorListener = listener
     }
-
 
     fun setImageBitmap(bitmap: Bitmap) {
         mImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -283,17 +304,26 @@ class ImageColorPickerView @JvmOverloads constructor(
         mPickColorListener?.onColorPicked(selectedColor)
     }
 
+    /**
+     * Check whether the touch event is within image view or not.
+     * Padding area does not be considered as image view.
+     */
     private fun touchInBound(event: MotionEvent): Boolean {
         return event.x >= paddingLeft && event.x <= mImageViewWidth + paddingLeft &&
                 event.y >= paddingTop && event.y <= mImageViewHeight + paddingTop
     }
 
-
+    /**
+     * Pool the color from given coordination.
+     */
     private fun poolColor(xPad: Int, yPad: Int): Int {
         mResizedBitmap?.let { self ->
+            // Since the bitmap has already been scaled to fit the actual showing image size,
+            // the corresponding coordination of pixels in bitmap is just relative to the padding.
             val x = xPad - paddingLeft
             val y = yPad - paddingTop
 
+            // Get the square of probing area
             val minX = (x - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
             val minY = (y - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
             val maxX = (x + mPickerProbeRadius).takeIf { it < self.width }
@@ -301,12 +331,14 @@ class ImageColorPickerView @JvmOverloads constructor(
             val maxY = (y + mPickerProbeRadius).takeIf { it < self.height }
                 ?: run { self.height - 1 }
 
+            // extract probing pixels from bitmap
             val probeWidth = maxX - minX + 1
             val probeHeight = maxY - minY + 1
             val pixelNum = probeWidth * probeHeight
             val pixels = IntArray(pixelNum)
             self.getPixels(pixels, 0, probeWidth, minX, minY, probeWidth, probeHeight)
 
+            // using pooling function to extract color
             return mPoolingFunc.exec(pixels)
         }
 
