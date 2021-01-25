@@ -37,11 +37,9 @@ class ImageColorPickerView @JvmOverloads constructor(
     /**
      * Width of picker's stroke
      */
-    private var mPickerStroke: Int = 5
-    var pickerStroke: Int
-        get() = mPickerStroke
+    var pickerStroke: Int = 5
         set(value) {
-            mPickerStroke = value
+            field = value
             mPickerStrokePaint.strokeWidth = value.toFloat()
             invalidate()
         }
@@ -49,33 +47,27 @@ class ImageColorPickerView @JvmOverloads constructor(
     /**
      * Radius of picker
      */
-    private var mPickerRadius: Int = 10
-    var pickerRadius: Int
-        get() = mPickerRadius
+    var pickerRadius: Int = 10
         set(value) {
-            mPickerRadius = value
+            field = value
             invalidate()
         }
 
     /**
      * X-axis offset from user's touch point which will be calculated when showing picker.
      */
-    private var mPickerOffsetX: Int = 0
-    var pickerOffsetX: Int
-        get() = mPickerOffsetX
+    var pickerOffsetX: Int = 0
         set(value) {
-            mPickerOffsetX = value
+            field = value
             invalidate()
         }
 
     /**
      * Y-axis offset from user's touch point which will be calculated when showing picker.
      */
-    private var mPickerOffsetY: Int = 0
-    var pickerOffsetY: Int
-        get() = mPickerOffsetY
+    var pickerOffsetY: Int = 0
         set(value) {
-            mPickerOffsetY = value
+            field = value
             invalidate()
         }
 
@@ -85,22 +77,18 @@ class ImageColorPickerView @JvmOverloads constructor(
      * ImageColorPickerView will use user's touch point and this radius to extract
      * pixels from surrounding area for color pooling.
      */
-    private var mPickerProbeRadius: Int = 10
-    var pickerProbeRadius: Int
-        get() = mPickerProbeRadius
+    var pickerProbeRadius: Int = 0
         set(value) {
-            mPickerProbeRadius = value
+            field = value
             invalidate()
         }
 
     /**
      * Enable picker when user touch the image view or not.
      */
-    private var mEnablePicker: Boolean = true
-    var enablePicker: Boolean
-        get() = mEnablePicker
+    var enablePicker: Boolean = true
         set(value) {
-            mEnablePicker = value
+            field = value
             invalidate()
         }
 
@@ -131,7 +119,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
     private val mPickerStrokePaint = Paint().apply {
         color = Color.WHITE
-        strokeWidth = mPickerStroke.toFloat()
+        strokeWidth = pickerStroke.toFloat()
         style = Paint.Style.STROKE
     }
 
@@ -141,8 +129,10 @@ class ImageColorPickerView @JvmOverloads constructor(
 
     fun setImage(uri: Uri) {
         val originalBitmap = decodeUri(uri)
-        setImage(originalBitmap)
-        originalBitmap.recycle()
+        if (originalBitmap != null) {
+            setImage(originalBitmap)
+            originalBitmap.recycle()
+        }
         invalidate()
     }
 
@@ -206,7 +196,7 @@ class ImageColorPickerView @JvmOverloads constructor(
                 pickerStroke =
                     getDimension(R.styleable.ImageColorPickerView_pickerStroke, 5f).toInt()
                 pickerProbeRadius =
-                    getInt(R.styleable.ImageColorPickerView_pickerProbeRadius, 10)
+                    getInt(R.styleable.ImageColorPickerView_pickerProbeRadius, 0)
                 enablePicker = getBoolean(R.styleable.ImageColorPickerView_enablePicker, true)
             }
         }
@@ -245,15 +235,15 @@ class ImageColorPickerView @JvmOverloads constructor(
 
                 if (mShowPicker) {
                     drawCircle(
-                        mSelectorPositionX + mPickerOffsetX,
-                        mSelectorPositionY + mPickerOffsetY,
-                        mPickerRadius.toFloat(),
+                        mSelectorPositionX + pickerOffsetX,
+                        mSelectorPositionY + pickerOffsetY,
+                        pickerRadius.toFloat(),
                         mPickerPaint
                     )
                     drawCircle(
-                        mSelectorPositionX + mPickerOffsetX,
-                        mSelectorPositionY + mPickerOffsetY,
-                        mPickerRadius.toFloat(),
+                        mSelectorPositionX + pickerOffsetX,
+                        mSelectorPositionY + pickerOffsetY,
+                        pickerRadius.toFloat(),
                         mPickerStrokePaint
                     )
                 }
@@ -262,7 +252,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!mEnablePicker || mProjectedBitmap == null) {
+        if (!enablePicker || mProjectedBitmap == null) {
             return false
         }
 
@@ -361,11 +351,11 @@ class ImageColorPickerView @JvmOverloads constructor(
             val y = yPad - paddingTop
 
             // Get the square of probing area
-            val minX = (x - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-            val minY = (y - mPickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
-            val maxX = (x + mPickerProbeRadius).takeIf { it < self.width }
+            val minX = (x - pickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val minY = (y - pickerProbeRadius).takeIf { it >= 0 } ?: run { 0 }
+            val maxX = (x + pickerProbeRadius).takeIf { it < self.width }
                 ?: run { self.width - 1 }
-            val maxY = (y + mPickerProbeRadius).takeIf { it < self.height }
+            val maxY = (y + pickerProbeRadius).takeIf { it < self.height }
                 ?: run { self.height - 1 }
 
             // extract probing pixels from bitmap
@@ -382,15 +372,22 @@ class ImageColorPickerView @JvmOverloads constructor(
         return 0xFFFFFF
     }
 
-    private fun decodeUri(uri: Uri): Bitmap {
-        return if (Build.VERSION.SDK_INT >= 28) {
+    private fun decodeUri(uri: Uri): Bitmap? = try {
+        if (Build.VERSION.SDK_INT >= 28) {
             val src = ImageDecoder.createSource(context.contentResolver, uri)
             ImageDecoder.decodeBitmap(src)
         } else {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
+    } catch (e: Exception) {
+        Log.d(LOG_TAG, "Unable to decode Uri: $uri")
+        null
     }
 
+    /**
+     * Project original bitmap onto projection bitmap, which has the size that exactly equal to
+     * image box.
+     */
     private fun projectBitmap() {
         if (mImageViewWidth > 0 && mImageViewHeight > 0) {
             mOriginalBitmap?.let {
