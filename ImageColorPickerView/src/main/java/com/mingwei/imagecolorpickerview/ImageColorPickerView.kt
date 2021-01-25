@@ -35,6 +35,16 @@ class ImageColorPickerView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     /**
+     * Color of picker's stroke
+     */
+    var pickerStrokeColor: Int = Color.WHITE
+        set(value) {
+            field = value
+            mPickerStrokePaint.color = value
+            invalidate()
+        }
+
+    /**
      * Width of picker's stroke
      */
     var pickerStroke: Int = 5
@@ -195,6 +205,8 @@ class ImageColorPickerView @JvmOverloads constructor(
                     getDimension(R.styleable.ImageColorPickerView_pickerOffsetY, 0f).toInt()
                 pickerStroke =
                     getDimension(R.styleable.ImageColorPickerView_pickerStroke, 5f).toInt()
+                pickerStrokeColor =
+                    getColor(R.styleable.ImageColorPickerView_pickerStrokeColor, Color.WHITE)
                 pickerProbeRadius =
                     getInt(R.styleable.ImageColorPickerView_pickerProbeRadius, 0)
                 enablePicker = getBoolean(R.styleable.ImageColorPickerView_enablePicker, true)

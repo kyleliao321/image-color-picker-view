@@ -6,6 +6,7 @@
         <attr name="pickerOffsetY" format="dimension" />
         <attr name="pickerProbeRadius" format="integer" />
         <attr name="pickerStroke" format="dimension" />
+        <attr name="pickerStrokeColor" format="color" />
         <attr name="enablePicker" format="integer" />
     </declare-styleable>
 </resources>
