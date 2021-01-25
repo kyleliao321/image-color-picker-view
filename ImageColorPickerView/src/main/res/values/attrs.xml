@@ -5,8 +5,10 @@
         <attr name="pickerOffsetX" format="dimension" />
         <attr name="pickerOffsetY" format="dimension" />
         <attr name="pickerProbeRadius" format="integer" />
-        <attr name="pickerStroke" format="dimension" />
+        <attr name="pickerStrokeWidth" format="dimension" />
         <attr name="pickerStrokeColor" format="color" />
-        <attr name="enablePicker" format="integer" />
+        <attr name="enablePicker" format="boolean" />
+
+        <attr name="imageSrc" format="reference" />
     </declare-styleable>
 </resources>

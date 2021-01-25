@@ -47,7 +47,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     /**
      * Width of picker's stroke
      */
-    var pickerStroke: Int = 5
+    var pickerStrokeWidth: Int = 5
         set(value) {
             field = value
             mPickerStrokePaint.strokeWidth = value.toFloat()
@@ -129,7 +129,7 @@ class ImageColorPickerView @JvmOverloads constructor(
     }
     private val mPickerStrokePaint = Paint().apply {
         color = Color.WHITE
-        strokeWidth = pickerStroke.toFloat()
+        strokeWidth = pickerStrokeWidth.toFloat()
         style = Paint.Style.STROKE
     }
 
@@ -190,7 +190,7 @@ class ImageColorPickerView @JvmOverloads constructor(
         pickerRadius = (pickerRadius * density).toInt()
         pickerOffsetX = (pickerOffsetX * density).toInt()
         pickerOffsetY = (pickerOffsetY * density).toInt()
-        pickerStroke = (pickerStroke * density).toInt()
+        pickerStrokeWidth = (pickerStrokeWidth * density).toInt()
 
         attrs?.let {
             val a: TypedArray =
@@ -203,8 +203,8 @@ class ImageColorPickerView @JvmOverloads constructor(
                     getDimension(R.styleable.ImageColorPickerView_pickerOffsetX, 0f).toInt()
                 pickerOffsetY =
                     getDimension(R.styleable.ImageColorPickerView_pickerOffsetY, 0f).toInt()
-                pickerStroke =
-                    getDimension(R.styleable.ImageColorPickerView_pickerStroke, 5f).toInt()
+                pickerStrokeWidth =
+                    getDimension(R.styleable.ImageColorPickerView_pickerStrokeWidth, 5f).toInt()
                 pickerStrokeColor =
                     getColor(R.styleable.ImageColorPickerView_pickerStrokeColor, Color.WHITE)
                 pickerProbeRadius =

@@ -10,11 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.mingwei.imagecolorpickerview.ImageColorPickerView
+        <com.mingwei.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
             android:id="@+id/color_picker"
             android:layout_width="400dp"
             android:layout_height="400dp"
             android:padding="20dp"
+            picker:pickerStrokeWidth="5dp"
+            picker:pickerStrokeColor="@color/white"
+            picker:pickerRadius="20dp"
+            picker:pickerOffsetX="-10dp"
+            picker:pickerOffsetY="-10dp"
+            picker:pickerProbeRadius="10"
+            picker:enablePicker="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
