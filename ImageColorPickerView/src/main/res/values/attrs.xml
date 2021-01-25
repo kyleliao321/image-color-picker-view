@@ -4,6 +4,8 @@
         <attr name="selectorRadius" format="dimension" />
         <attr name="selectorOffsetX" format="dimension" />
         <attr name="selectorOffsetY" format="dimension" />
+        <attr name="selectorProbeRadius" format="integer" />
+        <attr name="selectorStroke" format="dimension" />
         <attr name="enableSelector" format="integer" />
     </declare-styleable>
 </resources>
