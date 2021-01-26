@@ -15,7 +15,6 @@ A custom view that allow your user pick color from the image.
 	picker:pickerRadius="20dp"
 	picker:pickerOffsetX="-10dp"
 	picker:pickerOffsetY="-10dp"
-	picker:pickerProbeRadius="10"
 	picker:enablePicker="true"   />
 ```
 Note: All the picker's custom attributes are optional.
@@ -31,7 +30,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
 	// All the attributes can be updated at runtime.
 	// Be cautious that some of the attributes' unit are
 	// in density-independent pixels (dp)
-	pickerView.pickerProbeRadius = 1
 	pickerView.pickerRadius = 50
 	pickerView.pickerOffsetX = 5
 	pickerView.pickerOffsetY = -10
@@ -219,4 +217,58 @@ All of custom attributes have setter can be called with view object, allowing up
 		 <attr name="enablePicker" format="boolean" />
 	 </declare-styleable>
 </resources>
+```
+
+## Probe Radius
+On the android device, when user's finger touched on the screen, ImageColorPickerView can catch event from operating system. The event can provide us which coordination did user touched in (x, y) format.
+
+The problem is, this coordination is too ambiguous, it is impossible that user actually **only** touched on that particular pixel. So, ImageColorPickerView provides additional attributes: `pickerProbeRadius`. This allow ImageColorPickerView to use event's coordination as center and `pickerProbeRadius`  as radius to search surronding area . Then, it will use [Pooling Function](#pooling) to select color from this area.
+
+By default, ImageColorPickerView set `pickerProbeRadius` as 0. That means, it only return the color of the pixel that system thinks user touched on. But you can adjust this value based on your need:
+
+- wih xml:
+```xml
+<com.mingwei.imagecolorpickerview.ImageColorPickerView
+	xmlns:picker="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/color_picker"
+	android:layout_width="400dp"
+	android:layout_height="400dp"
+	android:padding="20dp"
+	picker:pickerProbeRadius="10"   />
+```
+- at runtime
+```kotlin
+findViewById<ImageColorPickerView>(R.id.color_picker)
+	.pickerProbeRadius = 10
+```
+
+## Pooling
+In addition to Probe Radius, ImgeColorPickerView also provide pooling function to define how to select from the probe area. It provides following poolings
+
+- AVERAGE_POOLING: Get the average value from each color space. This is the default pooling function.
+- BRIGHTEST_POOLING: This use [Relative Luminance](https://en.wikipedia.org/wiki/Relative_luminance) to calculate how bright each pixel is, and select the one that is brightest.
+- DARKEST_POOLING: This use [Relative Luminance](https://en.wikipedia.org/wiki/Relative_luminance) to calculate how bright each pixel is, and select the one that is darkest.
+
+You can change the pooling function by calling:
+```kotlin
+// using brightest pooling
+findViewById<ImageColorPickerView>(R.id.color_picker)
+	.setPoolingFunc(PoolingFunction.BRIGHTEST_POOLING)
+
+// using darkest pooling
+findViewById<ImageColorPickerView>(R.id.color_picker)
+	.setPoolingFunc(PoolingFunction.DARKEST_POOLING)
+```
+Also, you can defined your own pooling function:
+```kotlin
+// although not realy useful, this custom pooling
+// function will always show the black as picked color
+private val customPooling = object : IPoolingFunction {
+    override fun exec(pixels: IntArray): Int {
+        return Color.BLACK
+  }
+}
+
+findViewById<ImageColorPickerView>(R.id.color_picker)
+	.setPoolingFunc(customPooling )
 ```
