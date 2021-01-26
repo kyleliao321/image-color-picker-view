@@ -3,7 +3,7 @@ package com.mingwei.imagecolorpickerview.pooling
 import android.graphics.Color
 import androidx.annotation.ColorInt
 
-object DarkestPooling : PoolingFunction {
+class DarkestPooling internal constructor() : IPoolingFunction {
 
     override fun exec(pixels: IntArray): Int {
         var darkest = Double.MAX_VALUE

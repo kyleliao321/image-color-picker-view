@@ -3,7 +3,7 @@ package com.mingwei.imagecolorpickerview.pooling
 import android.graphics.Color
 import androidx.annotation.ColorInt
 
-object BrightestPooling : PoolingFunction {
+class BrightestPooling internal constructor() : IPoolingFunction {
 
     override fun exec(pixels: IntArray): Int {
         var brightest = Double.MIN_VALUE

@@ -10,6 +10,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import com.mingwei.imagecolorpickerview.ImageColorPickerView
+import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +37,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        findViewById<ImageColorPickerView>(R.id.color_picker)
+            .setPoolingFunc(PoolingFunction.BRIGHTEST_POOLING)
 
         findViewById<ImageColorPickerView>(R.id.color_picker)
             .setPickColorListener(pickColorListener)

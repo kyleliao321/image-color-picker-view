@@ -6,70 +6,67 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.mingwei.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/color_picker"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:padding="10dp"
-        picker:pickerStrokeColor="@color/white"
-        picker:pickerProbeRadius="1"
-        picker:pickerRadius="20dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <Button
         android:id="@+id/select_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:text="SELECT IMAGE"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/color_picker"
+        android:layout_marginStart="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.mingwei.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/color_picker"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        picker:layout_constraintTop_toBottomOf="@id/select_image_button"
+        picker:pickerProbeRadius="1"
+        picker:pickerRadius="20dp"
+        picker:pickerStrokeColor="@color/white" />
 
     <ImageView
         android:id="@+id/picked_color_1"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
         android:background="@drawable/stroke_background"
-        app:layout_constraintTop_toBottomOf="@id/select_image_button"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/picked_color_2"
         app:layout_constraintEnd_toStartOf="@id/picked_color_2"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/color_picker" />
 
     <ImageView
         android:id="@+id/picked_color_2"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:background="@drawable/stroke_background"
-        app:layout_constraintTop_toBottomOf="@id/select_image_button"
-        app:layout_constraintStart_toEndOf="@id/picked_color_1"
-        app:layout_constraintEnd_toStartOf="@id/picked_color_3"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/picked_color_3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/picked_color_1" />
 
     <ImageView
         android:id="@+id/picked_color_3"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+
         android:background="@drawable/stroke_background"
-        app:layout_constraintTop_toBottomOf="@id/select_image_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/picked_color_2"
-        app:layout_constraintEnd_toStartOf="@id/picked_color_4" />
+        app:layout_constraintBottom_toTopOf="@id/picked_color_4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/picked_color_2" />
 
     <ImageView
         android:id="@+id/picked_color_4"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:background="@drawable/stroke_background"
-        app:layout_constraintTop_toBottomOf="@id/select_image_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/picked_color_3"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/picked_color_3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,13 +1,12 @@
 package com.mingwei.imagecolorpickerview.pooling
 
-/**
- * Pooling function will be used to get color from given pixel array.
- */
-interface PoolingFunction {
+class PoolingFunction private constructor() {
 
-    /**
-     * @param pixels Pixels that contains colors in ARGB_8888 format.
-     * @return Color in ARGB_8888 format.
-     */
-    fun exec(pixels: IntArray): Int
+    companion object {
+        val MAX_POOLING = MaxPooling()
+        val AVERAGE_POOLING = AveragePooling()
+        val BRIGHTEST_POOLING = BrightestPooling()
+        val DARKEST_POOLING = DarkestPooling()
+    }
+
 }

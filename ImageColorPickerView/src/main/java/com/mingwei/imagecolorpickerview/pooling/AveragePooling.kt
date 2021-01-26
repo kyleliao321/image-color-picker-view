@@ -2,7 +2,7 @@ package com.mingwei.imagecolorpickerview.pooling
 
 import android.graphics.Color
 
-object AveragePooling : PoolingFunction {
+class AveragePooling internal constructor() : IPoolingFunction {
 
     override fun exec(pixels: IntArray): Int {
         val pixelNum = pixels.size

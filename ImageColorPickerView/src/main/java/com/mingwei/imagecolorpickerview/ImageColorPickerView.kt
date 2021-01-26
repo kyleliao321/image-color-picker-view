@@ -15,6 +15,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.content.res.ResourcesCompat
 import com.mingwei.imagecolorpickerview.pooling.AveragePooling
+import com.mingwei.imagecolorpickerview.pooling.IPoolingFunction
 import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
 /**
@@ -105,9 +106,9 @@ class ImageColorPickerView @JvmOverloads constructor(
     /**
      * Pooling function which will be used for selecting color from probe area's pixels.
      */
-    private var mPoolingFunc: PoolingFunction = AveragePooling
-    fun setPoolingFunc(func: PoolingFunction) {
-        mPoolingFunc = func
+    private var mIPoolingFunc: IPoolingFunction = PoolingFunction.AVERAGE_POOLING
+    fun setPoolingFunc(func: IPoolingFunction) {
+        mIPoolingFunc = func
     }
 
     @ColorInt
@@ -378,7 +379,7 @@ class ImageColorPickerView @JvmOverloads constructor(
             self.getPixels(pixels, 0, probeWidth, minX, minY, probeWidth, probeHeight)
 
             // using pooling function to extract color
-            return mPoolingFunc.exec(pixels)
+            return mIPoolingFunc.exec(pixels)
         }
 
         return 0xFFFFFF
