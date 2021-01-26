@@ -14,7 +14,6 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.content.res.ResourcesCompat
-import com.mingwei.imagecolorpickerview.pooling.AveragePooling
 import com.mingwei.imagecolorpickerview.pooling.IPoolingFunction
 import com.mingwei.imagecolorpickerview.pooling.PoolingFunction
 
@@ -50,6 +49,10 @@ class ImageColorPickerView @JvmOverloads constructor(
      */
     var pickerStrokeWidth: Int = 5
         set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("Picker stroke's width cannot be negative")
+            }
+
             field = value
             mPickerStrokePaint.strokeWidth = value.toFloat()
             invalidate()
@@ -60,6 +63,10 @@ class ImageColorPickerView @JvmOverloads constructor(
      */
     var pickerRadius: Int = 10
         set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("Picker's radius cannot be negative")
+            }
+
             field = value
             invalidate()
         }
@@ -90,6 +97,9 @@ class ImageColorPickerView @JvmOverloads constructor(
      */
     var pickerProbeRadius: Int = 0
         set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("Picker's probe radius cannot be negative")
+            }
             field = value
             invalidate()
         }
