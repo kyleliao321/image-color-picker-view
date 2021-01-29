@@ -30,6 +30,9 @@ class MainActivity : AppCompatActivity() {
 
                 findViewById<ImageColorPickerView>(R.id.color_picker)
                     .setImage(uri)
+
+                findViewById<Button>(R.id.select_image_button)
+                    .visibility = View.GONE
             }
         }
     }

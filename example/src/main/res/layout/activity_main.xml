@@ -18,20 +18,20 @@
 
     <com.mingwei.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
         android:id="@+id/color_picker"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        picker:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         picker:layout_constraintTop_toBottomOf="@id/select_image_button"
         picker:pickerProbeRadius="1"
-        picker:pickerRadius="20dp"
+        picker:pickerRadius="35dp"
         picker:pickerStrokeColor="@color/white" />
 
     <ImageView
         android:id="@+id/picked_color_1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         android:background="@drawable/stroke_background"
         app:layout_constraintBottom_toTopOf="@id/picked_color_2"
         app:layout_constraintEnd_toStartOf="@id/picked_color_2"
