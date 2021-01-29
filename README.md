@@ -3,6 +3,13 @@ A custom view that allow your user pick color from the image.
 
 ![ImageColorPickerViewDemo](https://raw.githubusercontent.com/kyleliao321/image-color-picker-view/main/assets/demo.jpg)
 
+## Gradle
+```java
+dependencies {
+	implementation 'com.colorgraph.utils:image_color_picker_view:0.1.0'
+}
+```
+
 ## Usage
 - Declare in xml:
 ```xml
