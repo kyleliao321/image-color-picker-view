@@ -1,6 +1,8 @@
 # ImageColorPickerView
 A custom view that allow your user pick color from the image.
 
+![ImageColorPickerViewDemo](https://raw.githubusercontent.com/kyleliao321/image-color-picker-view/main/assets/demo.jpg)
+
 ## Usage
 - Declare in xml:
 ```xml
