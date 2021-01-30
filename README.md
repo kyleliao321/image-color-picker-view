@@ -237,7 +237,7 @@ By default, ImageColorPickerView set `pickerProbeRadius` as 0. That means, it on
 
 - wih xml:
 ```xml
-<com.mingwei.imagecolorpickerview.ImageColorPickerView
+<com.colorgraph.utils.imagecolorpickerview.ImageColorPickerView
 	xmlns:picker="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/color_picker"
 	android:layout_width="400dp"
