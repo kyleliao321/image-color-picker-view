@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.colorgraph.example.MainActivity">
 
     <Button
         android:id="@+id/select_image_button"
@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.mingwei.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
+    <com.colorgraph.utils.imagecolorpickerview.ImageColorPickerView xmlns:picker="http://schemas.android.com/apk/res-auto"
         android:id="@+id/color_picker"
         android:layout_width="0dp"
         android:layout_height="0dp"

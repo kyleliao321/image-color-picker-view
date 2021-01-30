@@ -6,14 +6,14 @@ A custom view that allow your user pick color from the image.
 ## Gradle
 ```java
 dependencies {
-	implementation 'com.colorgraph.utils:image_color_picker_view:0.1.0'
+	implementation 'com.colorgraph.utils:image_color_picker_view:0.2.0'
 }
 ```
 
 ## Usage
 - Declare in xml:
 ```xml
-<com.mingwei.imagecolorpickerview.ImageColorPickerView
+<com.colorgraph.utils.imagecolorpickerview.ImageColorPickerView
 	xmlns:picker="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/color_picker"
 	android:layout_width="400dp"

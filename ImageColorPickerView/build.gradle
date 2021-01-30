@@ -8,23 +8,28 @@ ext {
     bintrayRepo = 'colorgraph' // Repo name in bintray dashboard
     bintrayName = 'image_color_picker_view' // package name of the bintray repo
 
-    publishedGroupId = 'com.colorgraph.utils'   // this is the ID we want to see in implementation line
+    publishedGroupId = 'com.colorgraph.utils'
+    // this is the ID we want to see in implementation line
     libraryName = 'ImageColorPickerView'     // this is the module name of library
-    artifact = 'image_color_picker_view'        // this is the artifact we want to see in implementation line
+    artifact = 'image_color_picker_view'
+    // this is the artifact we want to see in implementation line
 
-    libraryDescription = 'Test project library description' // description of library
+    libraryDescription = 'A custom view that allow user to pick color from image'
+    // description of library
 
     siteUrl = 'https://github.com/kyleliao321/image-color-picker-view'    // git repo url
     gitUrl = 'https://github.com/kyleliao321/image-color-picker-view.git' // git repo vcs url
 
-    libraryVersion = '0.1.0'      // library version
+    libraryVersion = '0.2.0'      // library version
 
     developerId = 'kyleliao0321'                // This is your bintray username
     developerName = 'Kyle Liao'              // Developer's name
     developerEmail = 'kyleliao032@gmail.com'                // Developer's email
 
-    licenseName = 'The Apache Software License, Version 2.0'  // for example, The Apache Software License, Version 2.0
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'   // for example, http://www.apache.org/licenses/LICENSE-2.0.txt
+    licenseName = 'The Apache Software License, Version 2.0'
+    // for example, The Apache Software License, Version 2.0
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    // for example, http://www.apache.org/licenses/LICENSE-2.0.txt
     allLicenses = ["Apache-2.0"]    // array of licenses, for example, ["Apache-2.0"]
 }
 
