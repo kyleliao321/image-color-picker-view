@@ -14,6 +14,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.scale
 import com.colorgraph.utils.imagecolorpickerview.pooling.IPoolingFunction
 import com.colorgraph.utils.imagecolorpickerview.pooling.PoolingFunction
 
@@ -415,9 +416,65 @@ class ImageColorPickerView @JvmOverloads constructor(
         if (mImageViewWidth > 0 && mImageViewHeight > 0) {
             mOriginalBitmap?.let {
                 mProjectedBitmap =
-                    Bitmap.createScaledBitmap(it, mImageViewWidth, mImageViewHeight, false)
+                    projectBitmap2(it)
             }
         }
+    }
+
+    private fun projectBitmap2(bitmap: Bitmap): Bitmap {
+        // crop to fit ratio
+        val widthRatio = bitmap.width.toFloat() / mImageViewWidth.toFloat()
+        val heightRatio = bitmap.height.toFloat() / mImageViewHeight.toFloat()
+
+        // crop according to the smaller ratio
+        val cropRatio =
+            if (widthRatio < heightRatio)
+                widthRatio / heightRatio
+            else
+                heightRatio / widthRatio
+        val cropBitmapWidth =
+            if (widthRatio < heightRatio)
+                bitmap.width
+            else
+                (bitmap.width * cropRatio).toInt()
+        val cropBitmapHeight =
+            if (heightRatio < widthRatio)
+                bitmap.height
+            else
+                (bitmap.height * cropRatio).toInt()
+
+        val offsetX =
+            if (cropBitmapWidth < bitmap.width)
+                (bitmap.width - cropBitmapWidth) / 2
+            else
+                0
+        val offsetY =
+            if (cropBitmapHeight < bitmap.height)
+                (bitmap.height - cropBitmapHeight) / 2
+            else
+                0
+
+        // store cropped bitmap
+        val croppedPixelCount = cropBitmapWidth * cropBitmapHeight
+        val pixels = IntArray(croppedPixelCount)
+
+        bitmap.getPixels(
+            pixels,
+            0,
+            cropBitmapWidth,
+            offsetX,
+            offsetY,
+            cropBitmapWidth,
+            cropBitmapHeight
+        )
+        val croppedBitmap =
+            Bitmap.createBitmap(cropBitmapWidth, cropBitmapHeight, Bitmap.Config.ARGB_8888)
+        croppedBitmap.setPixels(pixels, 0, cropBitmapWidth, 0, 0, cropBitmapWidth, cropBitmapHeight)
+
+        // scale to actual image box size to reduce pixels
+        val scaledBitmap = croppedBitmap.scale(mImageViewWidth, mImageViewHeight, false)
+        croppedBitmap.recycle()
+        return scaledBitmap
     }
 
 
